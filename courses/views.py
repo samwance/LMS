@@ -17,17 +17,17 @@ class LessonListAPIView(ListAPIView):
 
 class LessonUpdateAPIView(UpdateAPIView):
     serializer_class = LessonSerializer
+    queryset = Lesson.objects.all()
 
 
 class LessonDestroyAPIView(DestroyAPIView):
     serializer_class = LessonSerializer
+    queryset = Lesson.objects.all()
 
 
 class LessonRetrieveAPIView(RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-
-
 
 
 class CourseViewSet(viewsets.ModelViewSet):
