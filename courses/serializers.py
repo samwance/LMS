@@ -9,14 +9,14 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lesson_count = serializers.SerializerMethodField()
-    lesson = LessonSerializer(many=True, read_only=True)
+    lessons_count = serializers.SerializerMethodField()
+    lessons = LessonSerializer(many=True, read_only=True)
 
-    def get_lesson_count(self, course):
-        return course.lessons_set.count()
+    def get_lessons_count(self, course):
+        return course.lesson_set.count()
     class Meta:
         model = Course
-        fields = ('id', 'name', 'description', 'preview', 'lesson_count', 'lesson')
+        fields = ('id', 'name', 'description', 'preview', 'lessons_count', 'lessons')
 
 
 class PaymentSerializer(serializers.ModelSerializer):

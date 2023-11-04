@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 from users.models import NULL, User
 
@@ -54,3 +55,9 @@ class Payment(models.Model):
     class Meta:
         verbose_name = 'платеж'
         verbose_name_plural = 'платежи'
+        constraints = [
+            models.CheckConstraint(
+                check=Q(course__isnull=False, lesson__isnull=True) | Q(course__isnull=True, lesson__isnull=False),
+                name='course_and_lesson_not_both_null_or_both_filled'
+            )
+        ]
