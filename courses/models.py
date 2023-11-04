@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Q
 
+from config import settings
 from users.models import NULL, User
 
 
@@ -10,6 +11,7 @@ class Course(models.Model):
     name = models.CharField(max_length=250, verbose_name='название')
     preview = models.ImageField(upload_to='courses_pics/', verbose_name='превью курса', **NULL)
     description = models.TextField(verbose_name='описание')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULL)
 
     def __str__(self):
         return self.name
@@ -24,6 +26,7 @@ class Lesson(models.Model):
     preview = models.ImageField(upload_to='lessons_pics/', verbose_name='превью урока', **NULL)
     description = models.TextField(verbose_name='описание')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='курс')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULL)
 
     def __str__(self):
         return self.name
