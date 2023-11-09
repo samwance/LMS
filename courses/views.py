@@ -4,7 +4,7 @@ from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
 from courses.models import Course, Lesson, Payment
-from courses.permissons import IsOwner, IsNotStaff, IsOwnerOrStaff
+from courses.permissons import IsOwner, IsNotStaff, IsOwnerOrStaff, IsNotStaffView, IsOwnerOrStaffView
 from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 
 
@@ -47,10 +47,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
 
     def get_permissions(self):
-        if self.action == 'create' or self.action == 'delete':
-            permission_classes = [IsNotStaff]
+        if self.action in ('create', 'destroy'):
+            permission_classes = [IsNotStaffView]
         else:
-            permission_classes = [IsOwnerOrStaff]
+            permission_classes = [IsOwnerOrStaffView]
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
