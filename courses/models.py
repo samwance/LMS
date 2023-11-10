@@ -25,6 +25,7 @@ class Lesson(models.Model):
     name = models.CharField(max_length=250, verbose_name='название')
     preview = models.ImageField(upload_to='lessons_pics/', verbose_name='превью урока', **NULL)
     description = models.TextField(verbose_name='описание')
+    url = models.URLField(verbose_name='ссылка на видео', **NULL)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='курс')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULL)
 
@@ -64,3 +65,11 @@ class Payment(models.Model):
                 name='course_and_lesson_not_both_null_or_both_filled'
             )
         ]
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="пользователь")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="курс")
+
+    def __str__(self):
+        return f'{self.user.email} подписан на {self.course.title}'

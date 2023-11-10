@@ -3,9 +3,10 @@ from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
-from courses.models import Course, Lesson, Payment
+from courses.models import Course, Lesson, Payment, Subscription
+from courses.paginators import CoursePaginator, LessonPaginator
 from courses.permissons import IsOwner, IsModerator
-from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
+from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
 
 
 class LessonCreateAPIView(CreateAPIView):
@@ -22,6 +23,7 @@ class LessonListAPIView(ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsModerator | IsOwner]
+    pagination_class = LessonPaginator
 
 
 class LessonUpdateAPIView(UpdateAPIView):
@@ -45,6 +47,7 @@ class LessonRetrieveAPIView(RetrieveAPIView):
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CoursePaginator
 
     def get_permissions(self):
         if self.action in ('create', 'destroy'):
@@ -65,3 +68,21 @@ class PaymentListAPIView(ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('course', 'lesson', 'method')
     ordering_fields = ('date',)
+
+class SubscriptionCreateAPIView(CreateAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    def perform_create(self, serializer):
+        course_id = self.request.data.get('course_id')
+        course = Course.objects.get(id=course_id)
+        serializer.save(user=self.request.user, course=course)
+
+class SubscriptionDestroyAPIView(DestroyAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    def get_object(self):
+        course_id = self.request.data.get('course_id')
+        course = Course.objects.get(id=course_id)
+        return Subscription.objects.get(user=self.request.user, course=course)
