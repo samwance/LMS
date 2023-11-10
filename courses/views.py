@@ -4,13 +4,13 @@ from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
 from courses.models import Course, Lesson, Payment
-from courses.permissons import IsOwner, IsNotStaff, IsOwnerOrStaff, IsNotStaffView, IsOwnerOrStaffView
+from courses.permissons import IsOwner, IsModerator
 from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 
 
 class LessonCreateAPIView(CreateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = [IsNotStaff]
+    permission_classes = [~IsModerator]
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
@@ -21,25 +21,25 @@ class LessonCreateAPIView(CreateAPIView):
 class LessonListAPIView(ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerOrStaff]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonUpdateAPIView(UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwnerOrStaff]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonDestroyAPIView(DestroyAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsOwner, IsNotStaff]
+    permission_classes = [IsOwner]
 
 
 class LessonRetrieveAPIView(RetrieveAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsOwnerOrStaff]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -48,9 +48,9 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ('create', 'destroy'):
-            permission_classes = [IsNotStaffView]
+            permission_classes = [~IsModerator, IsOwner]
         else:
-            permission_classes = [IsOwnerOrStaffView]
+            permission_classes = [IsModerator | IsOwner]
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):

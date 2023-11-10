@@ -1,34 +1,21 @@
 from rest_framework.permissions import BasePermission
 
-
-class IsOwnerOrStaff(BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_staff:
-            return True
-
-        return request.user == view.get_object().owner
-
-
-class IsOwnerOrStaffView(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user == obj.owner or request.user == obj.is_staff:
-            return True
-        return False
+from users.models import UserRole
 
 
 class IsOwner(BasePermission):
-    def has_permission(self, request, view):
+    message = "Необходимо иметь права владельца."
 
-        return request.user == view.get_object().owner
-
-
-class IsNotStaff(BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_staff:
-            return False
-
-
-class IsNotStaffView(BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.user == obj.is_staff:
-            return False
+        if hasattr(obj, 'owner'):
+            return request.user == obj.owner
+        return False
+
+
+class IsModerator(BasePermission):
+    message = "Необходимо иметь права модератора."
+
+    def has_permission(self, request, view):
+        if request.user.role == UserRole.MODERATOR:
+            return True
+        return False
