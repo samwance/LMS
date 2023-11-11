@@ -196,13 +196,13 @@ class SubscriptionTestCase(APITestCase):
     def test_delete(self):
         """Тестирование удаления подписки"""
 
-        Subscription.objects.create(
+        course = Subscription.objects.create(
             user=self.user,
             course=self.course
         )
 
         response = self.client.delete(
-            reverse('courses:sub_delete', kwargs={'pk': self.course.pk})
+            reverse('courses:sub_delete', kwargs={'pk': course.pk})
         )
 
         self.assertEqual(
