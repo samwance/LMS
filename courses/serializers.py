@@ -5,6 +5,7 @@ from courses.validators import validator_links
 
 class LessonSerializer(serializers.ModelSerializer):
     url = serializers.URLField(validators=[validator_links])
+
     class Meta:
         model = Lesson
         fields = ('id', 'name', 'preview', 'description', 'course', 'owner', 'url')

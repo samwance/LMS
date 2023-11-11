@@ -19,3 +19,11 @@ class IsModerator(BasePermission):
         if request.user.role == UserRole.MODERATOR:
             return True
         return False
+
+
+class IsSubscriber(BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if request.user == obj.user:
+            return True
+        return False

@@ -3,20 +3,22 @@ from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
+
 from courses.models import Course, Lesson, Payment, Subscription
 from courses.paginators import CoursePaginator, LessonPaginator
-from courses.permissons import IsOwner, IsModerator
+from courses.permissons import IsOwner, IsModerator, IsSubscriber
 from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
 
 
 class LessonCreateAPIView(CreateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = [~IsModerator]
+
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
         new_lesson.owner = self.request.user
         new_lesson.save()
+
 
 
 class LessonListAPIView(ListAPIView):
@@ -73,16 +75,14 @@ class SubscriptionCreateAPIView(CreateAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
 
-    def perform_create(self, serializer):
-        course_id = self.request.data.get('course_id')
-        course = Course.objects.get(id=course_id)
-        serializer.save(user=self.request.user, course=course)
+    def perform_create(self, serializer, *args, **kwargs):
+        new_subscription = serializer.save()
+        new_subscription.user = self.request.user
+        pk = self.kwargs.get('pk')
+        new_subscription.course = Course.objects.get(pk=pk)
+        new_subscription.save()
 
 class SubscriptionDestroyAPIView(DestroyAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
-
-    def get_object(self):
-        course_id = self.request.data.get('course_id')
-        course = Course.objects.get(id=course_id)
-        return Subscription.objects.get(user=self.request.user, course=course)
+    permission_classes = [IsSubscriber]
