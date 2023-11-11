@@ -1,0 +1,22 @@
+[run]
+source = .
+omit =
+    */migrations/*
+    */tests/*
+    manage.py
+    */settings.py
+    */wsgi.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self\.debug:
+    if settings\.DEBUG:
+    if TYPE_CHECKING:
+    raise AssertionError
+    raise NotImplementedError
+    return NotImplemented
+
+[html]
+directory = coverage_html_report
