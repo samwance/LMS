@@ -12,6 +12,7 @@ class Course(models.Model):
     preview = models.ImageField(upload_to='courses_pics/', verbose_name='превью курса', **NULL)
     description = models.TextField(verbose_name='описание')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULL)
+    price = models.IntegerField(verbose_name='цена', default=1000)
 
     def __str__(self):
         return self.name
@@ -28,6 +29,7 @@ class Lesson(models.Model):
     url = models.URLField(verbose_name='ссылка на видео', **NULL)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='курс')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULL)
+    price = models.IntegerField(verbose_name='цена', default=100)
 
     def __str__(self):
         return self.name
