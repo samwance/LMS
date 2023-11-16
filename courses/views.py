@@ -1,8 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.response import Response
 
 from courses.models import Course, Lesson, Payment, Subscription
 from courses.paginators import CoursePaginator, LessonPaginator
@@ -86,3 +87,25 @@ class SubscriptionDestroyAPIView(DestroyAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = [IsSubscriber]
+
+
+class LessonPaymentAPIView(RetrieveAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        payment_link = serializer.data['payment_link']
+        return Response({'payment_link': payment_link})
+
+
+class CoursePaymentAPIView(RetrieveAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, context={'request': request})
+        payment_link = serializer.data['payment_link']
+        return Response({'payment_link': payment_link})
