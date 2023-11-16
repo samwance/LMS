@@ -1,9 +1,11 @@
+from config.settings import STRIPE_API_KEY
+
 import stripe
 
 
 def get_link_to_pay(obj):
 
-    stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+    stripe.api_key = STRIPE_API_KEY
 
     product = stripe.Product.create(name=obj.pk)
 
