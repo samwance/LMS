@@ -1,9 +1,7 @@
-from datetime import datetime
-from time import timezone
+import datetime
 
 from celery import shared_task
 
-from courses.models import Course
 from courses.services import send_mailing
 from users.models import User
 
