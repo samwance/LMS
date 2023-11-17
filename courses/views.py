@@ -1,14 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
 from rest_framework.filters import OrderingFilter
 
 from rest_framework.generics import CreateAPIView, DestroyAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
 from courses.models import Course, Lesson, Payment, Subscription
 from courses.paginators import CoursePaginator, LessonPaginator
 from courses.permissons import IsOwner, IsModerator, IsSubscriber
 from courses.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
+from courses.tasks import send_course_update_email
 
 
 class LessonCreateAPIView(CreateAPIView):
@@ -34,6 +35,16 @@ class LessonUpdateAPIView(UpdateAPIView):
     queryset = Lesson.objects.all()
     permission_classes = [IsModerator | IsOwner]
 
+    def perform_update(self, serializer):
+        serializer.save()
+        pk = self.kwargs.get('pk')
+        course = Lesson.objects.get(pk=pk).course
+        subscriptions = Subscription.objects.filter(course=course)
+
+        if subscriptions:
+            for subscription in subscriptions:
+                send_course_update_email.delay(subscription.pk)
+
 
 class LessonDestroyAPIView(DestroyAPIView):
     serializer_class = LessonSerializer
@@ -47,7 +58,7 @@ class LessonRetrieveAPIView(RetrieveAPIView):
     permission_classes = [IsModerator | IsOwner]
 
 
-class CourseViewSet(viewsets.ModelViewSet):
+class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = CoursePaginator
@@ -63,6 +74,16 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_course = serializer.save()
         new_course.owner = self.request.user
         new_course.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
+        pk = self.kwargs.get('pk')
+        course = Course.objects.get(pk=pk)
+        subscriptions = Subscription.objects.filter(course=course)
+
+        if subscriptions:
+            for subscription in subscriptions:
+                send_course_update_email.delay(subscription.pk)
 
 
 class PaymentListAPIView(ListAPIView):

@@ -1,6 +1,11 @@
+from django.conf.global_settings import EMAIL_HOST_USER
+from django.core.mail import send_mail
+
 from config.settings import STRIPE_API_KEY
 
 import stripe
+
+from courses.models import Subscription
 
 
 def get_link_to_pay(obj):
@@ -26,3 +31,16 @@ def get_link_to_pay(obj):
     )
 
     return payment_link.url
+
+def send_mailing(subscription_pk):
+    subscription = Subscription.objects.get(pk=subscription_pk)
+    user = subscription.user
+    emails = [user.email]
+    course = subscription.course
+
+    send_mail(
+        subject="Course Updated",
+        message=f"Course {course.name} is updated",
+        from_email=EMAIL_HOST_USER,
+        recipient_list=emails
+    )
